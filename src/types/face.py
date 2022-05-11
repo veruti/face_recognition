@@ -1,15 +1,17 @@
+from __future__ import annotations
+
+from ctypes import Union
+from typing import Optional
+
 from pydantic import BaseModel
+from src.types.bbox import BBox
 
-# TODO: Maybe make BBox model as parent model
-class Face(BaseModel):
-    x_min: int
-    x_max: int
 
-    y_max: int
-    y_min: int
+class Face(BBox):
+    def intersect(self, box: Union[BBox]) -> Optional[Face]:
 
-    def get_min_point(self) -> tuple[int]:
-        return (self.x_min, self.y_min)
+        if isinstance(box, BBox):
+            return super().intersect(box)
+        # TODO: Make intersection with face
 
-    def get_max_point(self) -> tuple[int]:
-        return (self.x_max, self.y_max)
+        return None

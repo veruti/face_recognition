@@ -27,10 +27,8 @@ class HeadEstimation:
 
         nn_outputs = self.executable_network.infer({self.input_name: input_image})
 
-        angle_p_fc = nn_outputs["angle_p_fc"]
-        angle_r_fc = nn_outputs["angle_r_fc"]
-        angle_y_fc = nn_outputs["angle_y_fc"]
+        pitch = nn_outputs["angle_p_fc"][0][0]
+        roll = nn_outputs["angle_r_fc"][0][0]
+        yaw = nn_outputs["angle_y_fc"][0][0]
 
-        if 10 < abs(angle_r_fc):
-            print("Take your head right")
-        # print(f"p: {angle_p_fc}. r: {angle_r_fc}. y: {angle_y_fc}.")
+        return pitch, roll, yaw

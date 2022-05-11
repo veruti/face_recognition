@@ -25,5 +25,14 @@ class Settings(BaseConfig):
 
     HEAD_INPUT_SIZE = (60, 60)
 
+    # ADD FACE STAGE SETTINGS
+    IOU_THRESHOLD = 0
+
+    YAW_MIN_THRESHOLD = -10
+    YAW_MAX_THRESHOLD = 10
+
+    PITCH_MIN_THRESHOLD = -10
+    PITCH_MAX_THRESHOLD = 10
+
 
 settings = Settings()
