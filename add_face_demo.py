@@ -1,17 +1,16 @@
 import math
-from pprint import pprint
 
 import cv2 as cv
 import numpy as np
 
 from src.core.setting import settings
+from src.db.faiss import IndexRepository
 from src.face_detector import FaceDetector
 from src.face_reid import FaceRaid
 from src.head_pose_estimation import HeadEstimation
 from src.types.bbox import BBox
 from src.types.face import Face
 from src.utils.draw import draw_bbox, draw_head_position_with_box
-import json
 
 
 def create_image_with_face_zone(image: np.array) -> np.array:
@@ -39,7 +38,10 @@ def get_ellipse_bbox(image: np.array) -> BBox:
 
 # TODO: Refactor Code and add vectors storage
 def main():
-    vid = cv.VideoCapture(0)
+    index_repo = IndexRepository()
+
+    name = input("Write name of person: ")
+
     detector = FaceDetector()
     reid = FaceRaid()
     head_estimator = HeadEstimation()
@@ -56,8 +58,7 @@ def main():
         "down_right": [],
     }
 
-    max_vectors = 10
-
+    vid = cv.VideoCapture(0)
     while True:
         _, frame = vid.read()
         working_image = frame.copy()
@@ -78,64 +79,67 @@ def main():
             )
 
             vector = reid.process_face(face_image=face_image)
+            # TODO: Refactot a lot "if" statements
             if (
                 (10 <= pitch)
                 and (-10 < yaw < 10)
-                and (len(face_container["up"]) < max_vectors)
+                and (len(face_container["up"]) < settings.MAX_VECTORS_PER_SIDE)
             ):
                 face_container["up"].append(vector)
             elif (
                 (10 <= pitch)
                 and (yaw <= -10)
-                and (len(face_container["up_left"]) < max_vectors)
+                and (len(face_container["up_left"]) < settings.MAX_VECTORS_PER_SIDE)
             ):
                 face_container["up_left"].append(vector)
             elif (
                 (10 <= pitch)
                 and (10 <= yaw)
-                and (len(face_container["up_right"]) < max_vectors)
+                and (len(face_container["up_right"]) < settings.MAX_VECTORS_PER_SIDE)
             ):
                 face_container["up_right"].append(vector)
 
             elif (
                 (-10 < pitch < 10)
                 and (-10 < yaw < 10)
-                and (len(face_container["middle"]) < max_vectors)
+                and (len(face_container["middle"]) < settings.MAX_VECTORS_PER_SIDE)
             ):
                 face_container["middle"].append(vector)
 
             elif (
                 (-10 < pitch < 10)
                 and (yaw <= -10)
-                and (len(face_container["middle_left"]) < max_vectors)
+                and (len(face_container["middle_left"]) < settings.MAX_VECTORS_PER_SIDE)
             ):
                 face_container["middle_left"].append(vector)
 
             elif (
                 (-10 < pitch < 10)
                 and (10 <= yaw)
-                and (len(face_container["middle_right"]) < max_vectors)
+                and (
+                    len(face_container["middle_right"]) < settings.MAX_VECTORS_PER_SIDE
+                )
             ):
                 face_container["middle_right"].append(vector)
 
             elif (
                 (pitch < -10)
                 and (-10 <= yaw <= 10)
-                and (len(face_container["down"]) < max_vectors)
+                and (len(face_container["down"]) < settings.MAX_VECTORS_PER_SIDE)
             ):
                 face_container["down"].append(vector)
 
             elif (
                 (pitch < -10)
                 and (yaw <= -10)
-                and (len(face_container["down_left"]) < max_vectors)
+                and (len(face_container["down_left"]) < settings.MAX_VECTORS_PER_SIDE)
             ):
                 face_container["down_left"].append(vector)
 
             elif (
                 (10 <= pitch)
                 and (10 <= yaw)
-                and (len(face_container["down_right"]) < max_vectors)
+                and (len(face_container["down_right"]) < settings.MAX_VECTORS_PER_SIDE)
             ):
                 face_container["down_right"].append(vector)
 
@@ -146,11 +150,18 @@ def main():
         #  STOP CONDITIONS
         if cv.waitKey(1) & 0xFF == ord("q"):
             break
-        if sum([len(face_container[key]) for key in face_container]) == 9 * max_vectors:
+        if (
+            sum([len(face_container[key]) for key in face_container])
+            == 9 * settings.MAX_VECTORS_PER_SIDE
+        ):
+            for key in face_container:
+                vectors = np.vstack(face_container[key]).astype(np.float32)
+                index_repo.add_vectors(vectors=vectors)
             break
 
     vid.release()
     cv.destroyAllWindows()
+    index_repo.save_index()
 
 
 if __name__ == "__main__":

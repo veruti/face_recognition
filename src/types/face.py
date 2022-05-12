@@ -12,6 +12,5 @@ class Face(BBox):
 
         if isinstance(box, BBox):
             return super().intersect(box)
-        # TODO: Make intersection with face
 
         return None

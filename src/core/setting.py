@@ -3,6 +3,9 @@ from pydantic import BaseConfig
 
 
 class Settings(BaseConfig):
+    # FAISS SETTINGS
+    FAISS_INDEX_PATH = "faces/flat.index"
+
     # DETECTION SETTINGS
     DETECTION_THRESHOLD = 0.9
     DETECTION_INPUT_SIZE = (448, 448)
@@ -18,6 +21,7 @@ class Settings(BaseConfig):
     REID_MODEL_BIN_PATH = "models/face-reidentification/face-reidentification-retail-0095/face-reidentification-retail-0095.bin"
 
     REID_INPUT_SIZE = (128, 128)
+    REID_VECTOR_DIMENSIONS = 256
 
     # HEAD POSE ESTIMATION
     HEAD_MODEL_XML_PATH = "models/head-pose-estimation/head-pose-estimation-adas-0001/head-pose-estimation-adas-0001.xml"
@@ -33,6 +37,8 @@ class Settings(BaseConfig):
 
     PITCH_MIN_THRESHOLD = -10
     PITCH_MAX_THRESHOLD = 10
+
+    MAX_VECTORS_PER_SIDE = 10
 
 
 settings = Settings()

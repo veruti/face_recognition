@@ -28,4 +28,4 @@ class FaceRaid:
         nn_outputs = self.executable_network.infer(
             {self.input_name: preprocessed_image}
         )
-        return nn_outputs["658"].reshape((256,))
+        return nn_outputs["658"].reshape((256,)).tolist()
