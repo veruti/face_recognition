@@ -1,8 +1,9 @@
 import cv2 as cv
 import numpy as np
 from openvino.inference_engine import IECore
-from src.types.face import Face
+
 from src.core.setting import settings
+from src.types.face import Face
 
 
 class FaceDetector:
@@ -18,12 +19,7 @@ class FaceDetector:
 
         self.input_name = next(iter(self.network.input_info))
 
-    def preprocess_image(self, image: np.array):
-        return cv.resize(
-            src=image, dsize=settings.DETECTION_INPUT_SIZE, interpolation=cv.INTER_AREA
-        ).transpose(2, 0, 1)
-
-    def process_frame(self, frame: np.array) -> list[Face]:
+    def get_faces(self, frame: np.array) -> list[Face]:
         frame_height, frame_width = frame.shape[:2]
 
         preprocessed = self.preprocess_image(image=frame)
@@ -43,3 +39,9 @@ class FaceDetector:
                 faces.append(face)
 
         return faces
+
+    @staticmethod
+    def preprocess_image(image: np.array):
+        return cv.resize(
+            src=image, dsize=settings.DETECTION_INPUT_SIZE, interpolation=cv.INTER_AREA
+        ).transpose(2, 0, 1)

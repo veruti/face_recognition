@@ -1,13 +1,15 @@
-from cmath import pi, sin
 from typing import Union
 
 import cv2 as cv
 import numpy as np
+
 from src.types.bbox import BBox
 from src.types.face import Face
 
 
-def draw_bbox(image: np.array, bbox: Union[BBox, Face], color: tuple[int], thickness=3):
+def draw_bbox(
+    image: np.array, bbox: Union[BBox, Face], color: tuple[int, int, int], thickness=3
+):
     return cv.rectangle(
         img=image,
         pt1=bbox.min_point,

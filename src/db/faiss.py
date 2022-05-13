@@ -1,21 +1,23 @@
 from pathlib import Path
 
 import numpy as np
-from src.core.setting import settings
 
 import faiss
-from faiss import IndexFlatIP, normalize_L2
+from faiss import IndexIDMap, normalize_L2
+from src.core.setting import settings
+
 
 # TODO: add metadata support (if possible)
 class IndexRepository:
     def __init__(self):
         self.index = self._load_index()
 
-    def _load_index(self) -> IndexFlatIP:
+    @staticmethod
+    def _load_index() -> IndexIDMap:
         if Path(settings.FAISS_INDEX_PATH).exists():
             return faiss.read_index(settings.FAISS_INDEX_PATH)
         else:
-            return IndexFlatIP(settings.REID_VECTOR_DIMENSIONS)
+            return IndexIDMap(settings.REID_VECTOR_DIMENSIONS)
 
     def save_index(self):
         faiss.write_index(self.index, settings.FAISS_INDEX_PATH)

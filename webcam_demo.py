@@ -3,11 +3,10 @@ import math
 import cv2 as cv
 import numpy as np
 
-from src.core.setting import settings
 from src.db.faiss import IndexRepository
-from src.face_detector import FaceDetector
-from src.face_reid import FaceRaid
-from src.head_pose_estimation import HeadEstimation
+from src.models.face_detector import FaceDetector
+from src.models.face_reid import FaceRaid
+from src.models.head_pose_estimation import HeadEstimation
 from src.types.bbox import BBox
 from src.types.face import Face
 from src.utils.draw import draw_bbox, draw_head_position_with_box
@@ -47,13 +46,13 @@ def main():
     while True:
         _, frame = vid.read()
         working_image = frame.copy()
-        faces: list[Face] = detector.process_frame(frame)
+        faces: list[Face] = detector.get_faces(frame)
 
         for face in faces:
             zone_face = draw_bbox(image=working_image, bbox=face, color=(255, 0, 0))
             face_image = frame[face.y_min : face.y_max, face.x_min : face.x_max]
 
-            pitch, roll, yaw = head_estimator.process_face(face_image=face_image)
+            pitch, roll, yaw = head_estimator.get_face_rotations(face_image=face_image)
 
             zone_face = draw_head_position_with_box(
                 image=zone_face,
@@ -63,7 +62,7 @@ def main():
                 yaw=math.radians(yaw),
             )
 
-            vector = reid.process_face(face_image=face_image)
+            vector = reid.get_face_vector(face_image=face_image)
             index_repo.search_vector(np.array([vector], dtype=np.float32))
             # TODO: print some results to image
 
